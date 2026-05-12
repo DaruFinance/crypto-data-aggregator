@@ -1,0 +1,57 @@
+{
+  "generated_at": "2026-05-12 22:32:21Z",
+  "machine": {
+    "platform": "Linux x86_64",
+    "processor": "x86_64",
+    "python": "3.12.13"
+  },
+  "parse_build": {
+    "agg_bars": 4000,
+    "bars_from_trades_rows_per_s": 3351343,
+    "build_agg_bars_rows_per_s": 1661674,
+    "merge_trades_rows_per_s": 4220376,
+    "per_venue_bars": 12000,
+    "timings_s": {
+      "bars_from_trades": 0.179,
+      "build_agg_bars": 0.3611,
+      "merge_trades": 0.1422
+    },
+    "trades_in": 600000
+  },
+  "query": {
+    "bars_1s_rows": 1733,
+    "duckdb_scan_rows": 12554,
+    "duckdb_scan_s": 0.4529,
+    "get_bars_s": {
+      "1h": {
+        "rows": 2,
+        "seconds": 4.4414
+      },
+      "1m": {
+        "rows": 31,
+        "seconds": 4.4817
+      },
+      "1s": {
+        "rows": 1733,
+        "seconds": 4.5379
+      },
+      "5m": {
+        "rows": 7,
+        "seconds": 4.4844
+      }
+    },
+    "symbol": "BTC-USDT",
+    "venue": "agg"
+  },
+  "storage": {
+    "bytes_on_disk": 8158965,
+    "bytes_per_row": 16.32,
+    "read_rows_per_s": 15691268,
+    "rows": 500000,
+    "timings_s": {
+      "read": 0.0319,
+      "write": 0.2534
+    },
+    "write_rows_per_s": 1973404
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "_comment": "Recorded-shape public WebSocket trade frames, one (or two, for channel-id protocols) per venue. Field names and value formats match the live feeds; values are illustrative. Used by tests/test_sources_parse.py to exercise each adapter's normalization path with no network.",
+  "binance": {
+    "canonical": "BTC-USDT",
+    "kind": "decoded_dict",
+    "frames": [
+      {"stream": "btcusdt@trade", "data": {"e": "trade", "E": 1778600000123, "s": "BTCUSDT", "t": 987654321, "p": "61234.50000000", "q": "0.01230000", "b": 100, "a": 200, "T": 1778600000111, "m": false, "M": true}}
+    ],
+    "expect": {"symbol": "BTC-USDT", "venue": "binance", "price": 61234.5, "size": 0.0123, "side": 1, "ts_ns": 1778600000111000000, "trade_id": "987654321"}
+  },
+  "coinbase": {
+    "canonical": "BTC-USD",
+    "kind": "raw_str",
+    "frames": [
+      "{\"channel\":\"market_trades\",\"client_id\":\"\",\"timestamp\":\"2026-05-12T12:00:00.123456Z\",\"sequence_num\":7,\"events\":[{\"type\":\"update\",\"trades\":[{\"trade_id\":\"123456\",\"product_id\":\"BTC-USD\",\"price\":\"61240.55\",\"size\":\"0.00420000\",\"side\":\"SELL\",\"time\":\"2026-05-12T12:00:00.012345Z\"}]}]}"
+    ],
+    "expect": {"symbol": "BTC-USD", "venue": "coinbase", "price": 61240.55, "size": 0.0042, "side": -1, "trade_id": "123456"}
+  },
+  "kraken": {
+    "canonical": "BTC-USD",
+    "kind": "raw_str",
+    "frames": [
+      "{\"channel\":\"trade\",\"type\":\"update\",\"data\":[{\"symbol\":\"BTC/USD\",\"side\":\"buy\",\"price\":61238.1,\"qty\":0.0017,\"ord_type\":\"market\",\"trade_id\":456,\"timestamp\":\"2026-05-12T12:00:00.500000Z\"}]}"
+    ],
+    "expect": {"symbol": "BTC-USD", "venue": "kraken", "price": 61238.1, "size": 0.0017, "side": 1, "trade_id": "456"}
+  },
+  "bybit": {
+    "canonical": "BTC-USDT-PERP",
+    "kind": "raw_str",
+    "frames": [
+      "{\"topic\":\"publicTrade.BTCUSDT\",\"type\":\"snapshot\",\"ts\":1778600000200,\"data\":[{\"T\":1778600000150,\"s\":\"BTCUSDT\",\"S\":\"Buy\",\"v\":\"0.005\",\"p\":\"61250.0\",\"L\":\"PlusTick\",\"i\":\"3c1d-aa\",\"BT\":false}]}"
+    ],
+    "expect": {"symbol": "BTC-USDT-PERP", "venue": "bybit", "price": 61250.0, "size": 0.005, "side": 1, "ts_ns": 1778600000150000000, "trade_id": "3c1d-aa"}
+  },
+  "okx": {
+    "canonical": "BTC-USDT",
+    "kind": "raw_str",
+    "frames": [
+      "{\"arg\":{\"channel\":\"trades\",\"instId\":\"BTC-USDT\"},\"data\":[{\"instId\":\"BTC-USDT\",\"tradeId\":\"445566\",\"px\":\"61245.7\",\"sz\":\"0.012\",\"side\":\"buy\",\"ts\":\"1778600000333\"}]}"
+    ],
+    "expect": {"symbol": "BTC-USDT", "venue": "okx", "price": 61245.7, "size": 0.012, "side": 1, "ts_ns": 1778600000333000000, "trade_id": "445566"}
+  },
+  "bitstamp": {
+    "canonical": "BTC-USDT",
+    "kind": "raw_str",
+    "frames": [
+      "{\"event\":\"trade\",\"channel\":\"live_trades_btcusdt\",\"data\":{\"id\":778899,\"timestamp\":\"1778600000\",\"microtimestamp\":\"1778600000444555\",\"amount\":0.0089,\"amount_str\":\"0.00890000\",\"price\":61248.0,\"price_str\":\"61248.00\",\"type\":0,\"buy_order_id\":1,\"sell_order_id\":2}}"
+    ],
+    "expect": {"symbol": "BTC-USDT", "venue": "bitstamp", "price": 61248.0, "size": 0.0089, "side": 1, "ts_ns": 1778600000444555000, "trade_id": "778899"}
+  },
+  "gemini": {
+    "canonical": "BTC-USDT",
+    "kind": "raw_str",
+    "frames": [
+      "{\"type\":\"trade\",\"symbol\":\"BTCUSDT\",\"event_id\":332211,\"timestamp\":1778600000555,\"price\":\"61252.3\",\"quantity\":\"0.0033\",\"side\":\"sell\"}"
+    ],
+    "expect": {"symbol": "BTC-USDT", "venue": "gemini", "price": 61252.3, "size": 0.0033, "side": -1, "ts_ns": 1778600000555000000, "trade_id": "332211"}
+  },
+  "bitfinex": {
+    "canonical": "BTC-USD",
+    "kind": "raw_str",
+    "frames": [
+      "{\"event\":\"subscribed\",\"channel\":\"trades\",\"chanId\":17,\"symbol\":\"tBTCUSD\",\"pair\":\"BTCUSD\"}",
+      "[17,\"te\",[1122334,1778600000666,0.0021,61255.1]]"
+    ],
+    "expect": {"symbol": "BTC-USD", "venue": "bitfinex", "price": 61255.1, "size": 0.0021, "side": 1, "ts_ns": 1778600000666000000, "trade_id": "1122334"}
+  }
+}

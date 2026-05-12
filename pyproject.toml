@@ -1,0 +1,89 @@
+[project]
+name = "cryptodata"
+version = "0.2.0"
+description = "Multi-source crypto market data aggregator: a cross-venue consolidated tape (trade-level VWAP, robust outlier filtering, full provenance), perpetual funding + open interest, L2 book snapshots, a data-quality scorecard, and a point-in-time-correct pandas-first query API."
+requires-python = ">=3.11"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "crypto-data-aggregator contributors" }]
+keywords = ["crypto", "market-data", "order-book", "consolidated-tape", "parquet", "duckdb"]
+dependencies = [
+    "aiohttp>=3.10",
+    "websockets>=13.0",
+    "orjson>=3.10",
+    "duckdb>=1.1",
+    "pyarrow>=17.0",
+    "pandas>=2.2",
+    "numpy>=2.0",
+    "pydantic>=2.8",
+    "tomli>=2.0; python_version < '3.11'",
+    "tenacity>=9.0",
+    "structlog>=24.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24",
+    "hypothesis>=6.0",
+    "ruff>=0.6",
+    "mypy>=1.11",
+    "pandas-stubs>=2.2",
+]
+api = [
+    "fastapi>=0.115",
+    "uvicorn>=0.30",
+]
+obs = [
+    "prometheus-client>=0.20",
+]
+notebooks = [
+    "matplotlib>=3.8",
+    "jupyterlab>=4.0",
+]
+
+[project.scripts]
+cda-ingest = "scripts.run_ingest:main"
+cda-backfill = "scripts.backfill:main"
+cda-build-bars = "scripts.build_bars_1s:main"
+cda-build-dataset = "scripts.build_dataset:main"
+cda-compact = "scripts.compact:main"
+cda-coverage = "scripts.coverage_report:main"
+cda-validate = "scripts.validate:main"
+cda-bench = "scripts.bench:main"
+cda-status = "scripts.status:main"
+cda-smoke = "scripts.smoke_test:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["cryptodata"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+# Research notebooks are exploratory artifacts, not held to the package lint bar.
+extend-exclude = ["notebooks", "data"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "C4", "SIM"]
+ignore = ["E501", "B008", "SIM108", "C401", "C408"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["B", "SIM"]
+"scripts/*" = ["B"]
+
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
+warn_unused_ignores = false
+warn_redundant_casts = true
+no_implicit_optional = true
+files = ["cryptodata"]

@@ -1,0 +1,36 @@
+{
+  "__inputs": [{"name": "DS_PROMETHEUS", "label": "Prometheus", "type": "datasource", "pluginId": "prometheus"}],
+  "title": "crypto-data-aggregator — overview",
+  "uid": "cryptodata-overview",
+  "schemaVersion": 39,
+  "version": 1,
+  "tags": ["cryptodata", "market-data"],
+  "timezone": "utc",
+  "time": {"from": "now-6h", "to": "now"},
+  "refresh": "30s",
+  "templating": {"list": [
+    {"name": "venue", "type": "query", "datasource": "${DS_PROMETHEUS}", "query": "label_values(cryptodata_rows_ingested_total, venue)", "includeAll": true, "multi": true},
+    {"name": "stream", "type": "query", "datasource": "${DS_PROMETHEUS}", "query": "label_values(cryptodata_rows_ingested_total, stream)", "includeAll": true, "multi": true}
+  ]},
+  "panels": [
+    {"type": "timeseries", "title": "Ingest rate (rows/s) by venue + stream", "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+     "datasource": "${DS_PROMETHEUS}",
+     "targets": [{"expr": "sum by (venue, stream) (rate(cryptodata_rows_ingested_total{venue=~\"$venue\", stream=~\"$stream\"}[5m]))", "legendFormat": "{{venue}}/{{stream}}"}]},
+    {"type": "stat", "title": "Feeds UP / total", "gridPos": {"h": 8, "w": 6, "x": 12, "y": 0},
+     "datasource": "${DS_PROMETHEUS}",
+     "targets": [{"expr": "sum(cryptodata_venue_up)", "legendFormat": "up"}, {"expr": "count(cryptodata_venue_up)", "legendFormat": "total"}]},
+    {"type": "timeseries", "title": "Worker restarts (rate/5m)", "gridPos": {"h": 8, "w": 6, "x": 18, "y": 0},
+     "datasource": "${DS_PROMETHEUS}",
+     "targets": [{"expr": "sum by (venue, stream) (rate(cryptodata_worker_restarts_total[5m]))", "legendFormat": "{{venue}}/{{stream}}"}]},
+    {"type": "timeseries", "title": "Receive lag (ms) p95 by venue", "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+     "datasource": "${DS_PROMETHEUS}",
+     "targets": [{"expr": "max by (venue) (cryptodata_recv_lag_ms{venue=~\"$venue\"})", "legendFormat": "{{venue}}"}],
+     "fieldConfig": {"defaults": {"unit": "ms"}}},
+    {"type": "table", "title": "Latest data-quality score by symbol/venue", "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+     "datasource": "${DS_PROMETHEUS}",
+     "targets": [{"expr": "cryptodata_quality_score", "format": "table", "instant": true}]},
+    {"type": "timeseries", "title": "Parquet part files written (rate/5m) by table", "gridPos": {"h": 8, "w": 24, "x": 0, "y": 16},
+     "datasource": "${DS_PROMETHEUS}",
+     "targets": [{"expr": "sum by (table) (rate(cryptodata_parquet_files_written_total[5m]))", "legendFormat": "{{table}}"}]}
+  ]
+}

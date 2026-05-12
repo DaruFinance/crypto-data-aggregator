@@ -1,0 +1,57 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-type-test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      - name: Ruff
+        run: ruff check .
+      - name: Mypy
+        run: mypy cryptodata
+        continue-on-error: true   # type-clean is a goal, not yet a gate
+      - name: Pytest
+        run: pytest -q --maxfail=1
+
+  build-dataset-smoke:
+    # A tiny end-to-end: backfill a few minutes of real data, build the tape, run
+    # coverage + validation. Network-dependent, so it doesn't gate PRs from forks.
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e ".[dev]"
+      - name: Build a tiny dataset
+        run: python -m scripts.build_dataset --trades-minutes 5 --reference-days 1 --no-bench
+      - name: Validate (fail on critical)
+        run: python -m scripts.validate --fail-on critical
+      - name: Status
+        run: python -m scripts.status
+      - name: Upload meta artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dataset-meta
+          path: data/meta/

@@ -1,0 +1,20 @@
+# Datasets are not committed — but the small, diffable metadata artifacts under
+# data/meta/ (coverage matrix, quality scorecards, dataset manifest, benchmarks) are.
+data/*
+!data/meta/
+data/meta/*.duckdb
+logs/
+*.parquet
+*.duckdb
+*.duckdb.wal
+.venv/
+.python-version-local
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+*.egg-info/
+dist/
+build/

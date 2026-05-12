@@ -1,0 +1,63 @@
+# Per-venue connection + rate-limit configuration. Single source of truth.
+# Rate limits are set to ~70% of published values to leave headroom for retries.
+
+[binance]
+ws_url = "wss://stream.binance.com:9443/stream"
+rest_base = "https://api.binance.com"
+# Published: 6000 weight/min for IP, ~50/min order rate. We don't trade, only read.
+rest_requests_per_minute = 4000
+ws_subscriptions_per_connection = 200
+clock_offset_tolerance_ms = 5000
+
+[binance_futures]
+ws_url = "wss://fstream.binance.com/stream"
+rest_base = "https://fapi.binance.com"
+rest_requests_per_minute = 1600   # 2400/min published
+ws_subscriptions_per_connection = 200
+
+[coinbase]
+ws_url = "wss://advanced-trade-ws.coinbase.com"
+rest_base = "https://api.exchange.coinbase.com"
+rest_requests_per_minute = 420    # ~10/s public published, ~7/s effective
+ws_subscriptions_per_connection = 100
+
+[kraken]
+ws_url = "wss://ws.kraken.com/v2"
+rest_base = "https://api.kraken.com"
+rest_requests_per_minute = 40     # tight public limit
+ws_subscriptions_per_connection = 50
+
+[bybit]
+ws_url = "wss://stream.bybit.com/v5/public/linear"
+rest_base = "https://api.bybit.com"
+rest_requests_per_minute = 5000   # 120/s published, conservative
+ws_subscriptions_per_connection = 100
+
+[okx]
+ws_url = "wss://ws.okx.com:8443/ws/v5/public"
+rest_base = "https://www.okx.com"
+rest_requests_per_minute = 1200   # ~20/2s per endpoint published, conservative
+ws_subscriptions_per_connection = 240
+
+[bitstamp]
+ws_url = "wss://ws.bitstamp.net"
+rest_base = "https://www.bitstamp.net"
+rest_requests_per_minute = 600    # ~10000/10min published
+ws_subscriptions_per_connection = 100
+
+[gemini]
+ws_url = "wss://api.gemini.com/v2/marketdata"
+rest_base = "https://api.gemini.com"
+rest_requests_per_minute = 120    # 120/min public published
+ws_subscriptions_per_connection = 100
+
+[bitfinex]
+ws_url = "wss://api-pub.bitfinex.com/ws/2"
+rest_base = "https://api-pub.bitfinex.com"
+rest_requests_per_minute = 90     # ~90/min per public REST endpoint
+ws_subscriptions_per_connection = 25
+
+[cryptocompare]
+rest_base = "https://min-api.cryptocompare.com"
+rest_requests_per_minute = 80     # 100k/month free; rate-aware in case bursts
+ws_url = ""

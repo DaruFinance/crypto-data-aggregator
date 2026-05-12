@@ -1,0 +1,167 @@
+# Top-20 universe. Canonical form: BASE-QUOTE (spot), BASE-QUOTE-PERP (perpetual).
+# For each canonical symbol, list the venue-native ticker per venue.
+
+[[symbols]]
+canonical = "BTC-USDT"
+binance = "BTCUSDT"
+bybit = "BTCUSDT"
+kraken = "XBTUSDT"
+okx = "BTC-USDT"
+bitstamp = "btcusdt"
+gemini = "btcusdt"
+bitfinex = "tBTCUST"
+
+[[symbols]]
+canonical = "BTC-USD"
+coinbase = "BTC-USD"
+kraken = "XBTUSD"
+bitstamp = "btcusd"
+gemini = "btcusd"
+bitfinex = "tBTCUSD"
+
+[[symbols]]
+canonical = "ETH-USDT"
+binance = "ETHUSDT"
+bybit = "ETHUSDT"
+kraken = "ETHUSDT"
+okx = "ETH-USDT"
+bitstamp = "ethusdt"
+gemini = "ethusdt"
+bitfinex = "tETHUST"
+
+[[symbols]]
+canonical = "ETH-USD"
+coinbase = "ETH-USD"
+kraken = "ETHUSD"
+bitstamp = "ethusd"
+gemini = "ethusd"
+bitfinex = "tETHUSD"
+
+[[symbols]]
+canonical = "SOL-USDT"
+binance = "SOLUSDT"
+bybit = "SOLUSDT"
+okx = "SOL-USDT"
+bitstamp = "solusdt"
+bitfinex = "tSOLUST"
+
+[[symbols]]
+canonical = "SOL-USD"
+coinbase = "SOL-USD"
+bitstamp = "solusd"
+bitfinex = "tSOLUSD"
+
+[[symbols]]
+canonical = "BNB-USDT"
+binance = "BNBUSDT"
+bybit = "BNBUSDT"
+
+[[symbols]]
+canonical = "XRP-USDT"
+binance = "XRPUSDT"
+bybit = "XRPUSDT"
+
+[[symbols]]
+canonical = "XRP-USD"
+coinbase = "XRP-USD"
+
+[[symbols]]
+canonical = "ADA-USDT"
+binance = "ADAUSDT"
+bybit = "ADAUSDT"
+
+[[symbols]]
+canonical = "DOGE-USDT"
+binance = "DOGEUSDT"
+bybit = "DOGEUSDT"
+
+[[symbols]]
+canonical = "AVAX-USDT"
+binance = "AVAXUSDT"
+bybit = "AVAXUSDT"
+
+[[symbols]]
+canonical = "LINK-USDT"
+binance = "LINKUSDT"
+bybit = "LINKUSDT"
+
+[[symbols]]
+canonical = "MATIC-USDT"
+binance = "MATICUSDT"
+bybit = "MATICUSDT"
+
+[[symbols]]
+canonical = "DOT-USDT"
+binance = "DOTUSDT"
+bybit = "DOTUSDT"
+
+[[symbols]]
+canonical = "LTC-USDT"
+binance = "LTCUSDT"
+bybit = "LTCUSDT"
+
+[[symbols]]
+canonical = "TRX-USDT"
+binance = "TRXUSDT"
+bybit = "TRXUSDT"
+
+[[symbols]]
+canonical = "NEAR-USDT"
+binance = "NEARUSDT"
+bybit = "NEARUSDT"
+
+[[symbols]]
+canonical = "ATOM-USDT"
+binance = "ATOMUSDT"
+bybit = "ATOMUSDT"
+
+[[symbols]]
+canonical = "ARB-USDT"
+binance = "ARBUSDT"
+bybit = "ARBUSDT"
+
+[[symbols]]
+canonical = "OP-USDT"
+binance = "OPUSDT"
+bybit = "OPUSDT"
+
+[[symbols]]
+canonical = "APT-USDT"
+binance = "APTUSDT"
+bybit = "APTUSDT"
+
+[[symbols]]
+canonical = "FIL-USDT"
+binance = "FILUSDT"
+bybit = "FILUSDT"
+
+[[symbols]]
+canonical = "ETC-USDT"
+binance = "ETCUSDT"
+bybit = "ETCUSDT"
+
+# Perpetuals (Binance Futures + Bybit linear perps)
+[[symbols]]
+canonical = "BTC-USDT-PERP"
+binance_futures = "BTCUSDT"
+bybit = "BTCUSDT"
+
+[[symbols]]
+canonical = "ETH-USDT-PERP"
+binance_futures = "ETHUSDT"
+bybit = "ETHUSDT"
+
+[[symbols]]
+canonical = "SOL-USDT-PERP"
+binance_futures = "SOLUSDT"
+bybit = "SOLUSDT"
+
+[[symbols]]
+canonical = "BNB-USDT-PERP"
+binance_futures = "BNBUSDT"
+bybit = "BNBUSDT"
+
+[[symbols]]
+canonical = "XRP-USDT-PERP"
+binance_futures = "XRPUSDT"
+bybit = "XRPUSDT"

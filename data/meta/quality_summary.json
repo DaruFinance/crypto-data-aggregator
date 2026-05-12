@@ -1,0 +1,33 @@
+{
+  "computed_at_ns": 1778621649333646508,
+  "dates": [
+    "2026-05-12"
+  ],
+  "grade_counts": {
+    "A": 18,
+    "B": 3,
+    "C": 1,
+    "D": 1,
+    "F": 1
+  },
+  "mean_score": 92.97,
+  "min_score": 34.54,
+  "slices": 24,
+  "symbols": [
+    "BTC-USD",
+    "BTC-USDT",
+    "ETH-USD",
+    "ETH-USDT"
+  ],
+  "total_critical_issues": 0,
+  "venues": [
+    "agg",
+    "binance",
+    "bitfinex",
+    "bitstamp",
+    "coinbase",
+    "gemini",
+    "kraken",
+    "okx"
+  ]
+}

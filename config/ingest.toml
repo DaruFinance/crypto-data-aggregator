@@ -1,0 +1,80 @@
+# Which streams to enable per venue. v1 defaults match the plan.
+
+[streams.binance]
+trades = true
+quotes = true
+book_l2_snapshot = ["BTC-USDT", "ETH-USDT"]   # top-4 L2 (USDT side)
+
+[streams.binance_futures]
+funding = true
+open_interest = true
+
+[streams.coinbase]
+trades = true
+quotes = true
+book_l2_snapshot = ["BTC-USD", "ETH-USD"]     # top-4 L2 (USD side)
+
+[streams.kraken]
+trades = true
+quotes = true
+
+[streams.bybit]
+funding = true
+open_interest = true
+
+[streams.okx]
+trades = true
+quotes = true
+
+[streams.bitstamp]
+trades = true
+quotes = true
+
+[streams.gemini]
+trades = true
+quotes = true
+
+[streams.bitfinex]
+trades = true
+quotes = true
+
+[book]
+levels = 20
+snapshot_interval_seconds = 5
+
+[writer]
+batch_rows = 50000
+batch_seconds = 60
+part_rotation_seconds = 3600   # hourly rotation
+
+[health]
+check_interval_seconds = 60
+trade_rate_window_seconds = 300
+trade_rate_baseline_seconds = 3600
+down_threshold_ratio = 0.10
+
+[metrics]
+port = 9464                    # Prometheus exporter (no-op unless the 'obs' extra is installed)
+
+[aggregate]
+# Consolidated-tape parameters (cryptodata.core.consolidated.build_agg_bars).
+mad_k = 5.0                    # robust outlier threshold, in MAD-derived sigmas
+min_venues_for_filter = 3      # don't drop prints in a second with fewer venues than this
+stale_recv_lag_ms = 5000       # drop trades whose recv_ns - ts_ns exceeds this (clock-skew guard)
+stale_quote_age_ms = 10000     # quotes older than this are treated as stale by consumers
+
+[backfill]
+chunk_seconds = 3600           # REST chunk size for backfill
+
+# Parameters for `cda-build-dataset` (scripts/build_dataset.py): the v1 sample corpus.
+[dataset]
+# Flagship pairs get tick-level trades from every spot venue that lists them, and a
+# consolidated 1s tape built from those trades.
+flagship_symbols = ["BTC-USD", "BTC-USDT", "ETH-USD", "ETH-USDT"]
+trades_window_minutes = 45     # how far back to backfill flagship trades from "now"
+# Breadth universe gets venue 1-minute reference klines (bars_ref) for the period below.
+reference_lookback_days = 7
+reference_interval = "1m"
+# Perp funding history pulled for these symbols.
+perp_symbols = ["BTC-USDT-PERP", "ETH-USDT-PERP"]
+perp_lookback_days = 14
