@@ -1,17 +1,14 @@
 {
-  "computed_at_ns": 1778621649333646508,
+  "computed_at_ns": 1778627001473934020,
   "dates": [
     "2026-05-12"
   ],
   "grade_counts": {
-    "A": 18,
-    "B": 3,
-    "C": 1,
-    "D": 1,
-    "F": 1
+    "A": 20,
+    "B": 4
   },
-  "mean_score": 92.97,
-  "min_score": 34.54,
+  "mean_score": 98.25,
+  "min_score": 90.0,
   "slices": 24,
   "symbols": [
     "BTC-USD",

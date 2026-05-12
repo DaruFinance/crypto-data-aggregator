@@ -18,8 +18,8 @@ against.
 
 | Series | Target | Metric |
 |---|---|---|
-| consolidated `agg` 1s tape (USDT majors) | ≥ 95 % of seconds covered over a full day | `daily_quality.completeness_pct` |
-| consolidated `agg` 1s tape (USD majors) | ≥ 80 % of seconds over a full day (USD spot volume is thinner) | `completeness_pct` |
+| consolidated `agg` 1s tape | ≥ 99.5 % `agg_coverage_of_union_pct` — i.e. capture (essentially) every second any contributing venue traded; "misses" only when all that second's trades were filtered outliers | `daily_quality.score_base_pct` (= `agg_coverage_of_union_pct`) |
+| 1s bar density (`agg` and per-venue) | reported, not targeted — `completeness_pct` / `day_coverage_pct` are market-activity metrics, not SLAs (USD spot is thinner than USDT, low-cap pairs are sparse) | `daily_quality.completeness_pct` |
 | per-venue 1s bars | no *anomalous* gap (> 60 s **and** > ~30× the venue's own median inter-bar gap) | the liquidity-aware gap check; `daily_quality.max_gap_seconds` |
 | per-venue reference klines (`bars_ref`) | every expected bar present for the requested window, subject to the venue's REST history depth | the coverage matrix |
 | perp funding | every settlement in the requested window | the coverage matrix |
@@ -38,8 +38,10 @@ agg-outside-venue-range, large anomalous gaps) cost 10 points each and should be
 investigated; MINOR issues (small gaps, off-grid timestamps, high receive lag,
 implausible spreads) cost 2; INFO (locked books) is free.
 
-Grades: A ≥ 95 · B ≥ 85 · C ≥ 70 · D ≥ 50 · F < 50. Target: every full-day slice ≥ B,
-the `agg` tape for USDT majors ≥ A.
+Grades: A ≥ 95 · B ≥ 85 · C ≥ 70 · D ≥ 50 · F < 50. The score grades *correctness and
+completeness-of-job* (invariants, cross-venue consistency, feed continuity, and for the
+`agg` tape its coverage of the contributing venues) — not market activity. Target: every
+slice ≥ B; the consolidated `agg` tape ≥ A.
 
 ## Reference data & lineage
 

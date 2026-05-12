@@ -91,3 +91,56 @@ def test_grades():
     assert grade_for(75) == "C"
     assert grade_for(55) == "D"
     assert grade_for(10) == "F"
+
+
+# --------------------------------------------------------------------------- #
+# scorecard: the agg series is graded on coverage of the contributing venues,
+# not on raw second-by-second density, and a thin venue is never penalized for sparsity.
+# --------------------------------------------------------------------------- #
+
+def _write_bar_seconds(symbol, venue, date, seconds, px=100.0):
+    from cryptodata.storage.parquet import write_dataframe
+    base = int(pd.Timestamp(date + " 00:00:00", tz="UTC").value)
+    rows = [{"ts_ns": base + s * 1_000_000_000, "symbol": symbol, "venue": venue,
+             "open": px, "high": px, "low": px, "close": px, "volume": 1.0, "vwap": px,
+             "trades": 1, "sources_mask": 0, "ingested_at_ns": base} for s in seconds]
+    write_dataframe("bars_1s", rows, symbol=symbol, venue=venue, date=date)
+
+
+def test_agg_scored_on_coverage_of_union_not_density():
+    from cryptodata.quality.report import score_day
+    from cryptodata.storage.duckdb_views import init_db
+    init_db()
+    date = "2026-05-12"
+    # venue A dense (every second 0..99), venue B + C sparse — union of traded seconds = {0..99}
+    _write_bar_seconds("BTC-USD", "binance", date, range(100))
+    _write_bar_seconds("BTC-USD", "coinbase", date, [0, 50, 99])
+    _write_bar_seconds("BTC-USD", "kraken", date, [10, 20, 30])
+    # agg covers the whole union
+    _write_bar_seconds("BTC-USD", "agg", date, range(100))
+
+    card_agg = score_day("BTC-USD", "agg", date)
+    assert card_agg["score_basis"] == "coverage_of_contributing_venues"
+    assert card_agg["agg_coverage_of_union_pct"] == 100.0
+    assert card_agg["score_base_pct"] == 100.0
+    assert card_agg["grade"] == "A" and card_agg["score"] == 100.0
+
+    # the sparse single venue: density is tiny but the series is correct → graded A, not penalized
+    card_b = score_day("BTC-USD", "coinbase", date)
+    assert card_b["completeness_pct"] < 5.0          # ~3 bars over a 100s span
+    assert card_b["score_basis"] == "clean_baseline"
+    assert card_b["grade"] == "A"
+
+
+def test_agg_penalised_when_it_misses_seconds_the_venues_had():
+    from cryptodata.quality.report import score_day
+    from cryptodata.storage.duckdb_views import init_db
+    init_db()
+    date = "2026-05-13"
+    _write_bar_seconds("ETH-USD", "binance", date, range(100))     # union = {0..99}
+    _write_bar_seconds("ETH-USD", "kraken", date, [0, 99])
+    _write_bar_seconds("ETH-USD", "agg", date, range(90))          # agg drops 10 of the 100 union seconds
+    card = score_day("ETH-USD", "agg", date)
+    assert card["agg_coverage_of_union_pct"] == 90.0
+    assert card["score_base_pct"] == 90.0
+    assert card["grade"] == "B" and card["score"] == 90.0

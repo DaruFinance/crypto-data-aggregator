@@ -187,10 +187,13 @@ def print_status(file=sys.stdout) -> None:
                    f"{qs.get('total_critical_issues', 0)} critical issue(s); " \
                    f"grades {qs.get('grade_counts', {})}"
         p(f"\nData quality (latest per symbol/venue){head}:")
-        p(f"  {'symbol':<14}{'venue':<14}{'grade':>6}{'score':>8}{'complete%':>11}{'crit':>6}  date")
+        p(f"  {'symbol':<14}{'venue':<14}{'grade':>6}{'score':>8}{'density%':>10}{'crit':>6}  date")
         for r in sorted(q, key=lambda x: (x["symbol"], x["venue"])):
             p(f"  {r['symbol']:<14}{r['venue']:<14}{str(r['grade']):>6}{float(r['score']):>8.1f}"
-              f"{float(r['completeness_pct']):>11.2f}{int(r['n_critical']):>6}  {r['date']}")
+              f"{float(r['completeness_pct']):>10.2f}{int(r['n_critical']):>6}  {r['date']}")
+        p("  (score grades correctness — invariants, cross-venue consistency, feed continuity, and for")
+        p("   `agg` how much of the contributing venues it captures; `density%` = raw bar density over the")
+        p("   window, an informational metric — low on thin pairs, not a defect.)")
     else:
         p("\nData quality: (none yet — run `cda-build-dataset` then `cda-validate`)")
 

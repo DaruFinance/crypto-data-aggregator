@@ -71,12 +71,22 @@ numerator so it stays correct under aggregation.
 Every `(symbol, venue, date)` slice gets a 0–100 score and an A–F grade, persisted to
 the `daily_quality` DuckDB table and mirrored to `data/meta/quality/<date>.json`.
 
-- **Base.** For the consolidated `agg` series, `base = completeness_pct` (fraction of
-  seconds in `[first_ts, last_ts]` that have a bar) — a sparse agg tape *is* a defect,
-  it means few venues covered that window. For a single-venue series, `base = 100`: a
-  thin venue is legitimately sparse second-to-second, and that sparsity is reported as
-  the `completeness_pct` / `day_coverage_pct` metrics rather than penalized. Only
-  *anomalous* gaps (see below) cost a venue series points.
+- **Base.** The score grades *how well we did our job*, not *how active the market was*:
+  - **Single-venue series:** `base = 100`. The series captures a bar for every second
+    the venue actually traded — we can't do better than the venue's own activity, so a
+    thin venue isn't a defect. Its raw bar density is reported as `completeness_pct` /
+    `day_coverage_pct` (informational), and only an *anomalous* gap (see below) — a feed
+    outage relative to the venue's own cadence — costs points.
+  - **Consolidated `agg` series:** `base = agg_coverage_of_union_pct` — the fraction of
+    the seconds where *any* contributing spot venue had a bar that the consolidated tape
+    also has a bar for. A correctly-built tape captures ≈100% of that union (the only
+    "misses" are seconds where every trade was a filtered outlier, which is correct to
+    drop). This is the metric that actually grades the consolidation; it deliberately
+    does **not** punish the tape for, say, the USD spot market being thinner than the
+    USDT one over a short window — the agg's raw density is still reported as
+    `completeness_pct`, but as a market-activity metric, not a quality demerit. (If
+    there's no per-venue context to compare against, `base = 100` — the tape can't be
+    held to a standard we can't measure.)
 - **Penalties.** Each distinct issue subtracts a weight: `info 0`, `minor 2`,
   `major 10`, `critical 30`. Score is clamped to `[0, 100]`. Grades: A ≥ 95, B ≥ 85,
   C ≥ 70, D ≥ 50, F < 50.

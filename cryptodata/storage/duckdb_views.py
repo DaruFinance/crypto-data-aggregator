@@ -101,9 +101,11 @@ def init_db(path=None) -> duckdb.DuckDBPyConnection:
             venue VARCHAR NOT NULL,            -- per-venue series or 'agg'
             score DOUBLE NOT NULL,             -- 0..100
             grade VARCHAR NOT NULL,            -- 'A'..'F'
+            score_base_pct DOUBLE,             -- the score base before issue penalties: 100 for a venue
+                                               -- series, agg_coverage_of_union_pct for 'agg'
             bars INTEGER,
             expected_bars INTEGER,
-            completeness_pct DOUBLE,
+            completeness_pct DOUBLE,           -- raw bar density over [first, last] (informational, not the SLA)
             max_gap_seconds INTEGER,
             n_issues INTEGER,
             n_critical INTEGER,
@@ -112,6 +114,8 @@ def init_db(path=None) -> duckdb.DuckDBPyConnection:
             PRIMARY KEY (date, symbol, venue)
         )
     """)
+    with contextlib.suppress(Exception):
+        con.execute("ALTER TABLE daily_quality ADD COLUMN IF NOT EXISTS score_base_pct DOUBLE")
     # Coverage matrix: rows per (table, symbol, venue, date) with observed vs expected.
     con.execute("""
         CREATE TABLE IF NOT EXISTS coverage (

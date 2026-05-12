@@ -12,23 +12,20 @@
       "2026-05-12 21:12:38+00:00"
     ]
   },
-  "built_at": "2026-05-12 21:37:00Z",
-  "corrections_logged": 67,
+  "built_at": "2026-05-12 23:03:48Z",
+  "corrections_logged": 0,
   "note": "v1 sample corpus from cda-build-dataset: flagship pairs carry ~30 min of tick-level trades across every listing spot venue (+ a 5-venue consolidated 1s tape per pair); breadth universe carries 5 days of 1-minute reference klines; perps carry 14 days of funding history.",
   "quality": {
-    "computed_at_ns": 1778621824186996253,
+    "computed_at_ns": 1778627032020472301,
     "dates": [
       "2026-05-12"
     ],
     "grade_counts": {
-      "A": 18,
-      "B": 3,
-      "C": 1,
-      "D": 1,
-      "F": 1
+      "A": 20,
+      "B": 4
     },
-    "mean_score": 92.97,
-    "min_score": 34.54,
+    "mean_score": 98.25,
+    "min_score": 90.0,
     "slices": 24,
     "symbols": [
       "BTC-USD",
@@ -48,45 +45,8 @@
       "okx"
     ]
   },
-  "symbol_map_mappings": 77,
-  "tables": [
-    {
-      "bytes_on_disk": 334996,
-      "dates": "2026-05-12..2026-05-12",
-      "partitions": 24,
-      "rows": 12554,
-      "symbols": 4,
-      "table": "bars_1s",
-      "venues": 8
-    },
-    {
-      "bytes_on_disk": 4352506,
-      "dates": "2026-05-07..2026-05-12",
-      "partitions": 198,
-      "rows": 232696,
-      "symbols": 21,
-      "table": "bars_ref",
-      "venues": 7
-    },
-    {
-      "bytes_on_disk": 127708,
-      "dates": "2026-04-29..2026-05-12",
-      "partitions": 56,
-      "rows": 168,
-      "symbols": 2,
-      "table": "funding",
-      "venues": 2
-    },
-    {
-      "bytes_on_disk": 510643,
-      "dates": "2026-05-12..2026-05-12",
-      "partitions": 20,
-      "rows": 51599,
-      "symbols": 4,
-      "table": "trades",
-      "venues": 7
-    }
-  ],
-  "total_bytes_on_disk": 5325853,
-  "total_rows": 297017
+  "symbol_map_mappings": 0,
+  "tables": [],
+  "total_bytes_on_disk": 0,
+  "total_rows": 0
 }

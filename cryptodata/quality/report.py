@@ -1,17 +1,30 @@
 """Per-(symbol, venue, date) data-quality scorecard.
 
-The score answers: *"how much should I trust this slice of the dataset?"*
+The score answers: *"how well did we do our job on this slice?"* — **not** "how active
+was the market", which is a property of the instrument, not of the data.
 
-    base   = completeness_pct   for the consolidated ``agg`` series  (a sparse agg tape
-                                IS a defect — it means few venues covered that window)
-           = 100                for a single-venue series           (a thin venue is
-                                legitimately sparse second-to-second; that sparsity is
-                                reported via ``completeness_pct`` / ``day_coverage_pct``
-                                as metrics, not penalized — only *anomalous* gaps
-                                relative to the venue's own cadence cost points, via the
-                                liquidity-aware gap check)
+    base   = 100                            for a single-venue series — it captures a
+                                            bar for every second the venue actually
+                                            traded; we can't do better than the venue's
+                                            own activity, so a thin venue is not a defect.
+           = agg_coverage_of_union_pct       for the consolidated ``agg`` series — what
+                                            fraction of the seconds where *any*
+                                            contributing spot venue traded does the
+                                            consolidated tape also cover. A correct tape
+                                            captures ~100% of that union (the only
+                                            "misses" are seconds where every trade was a
+                                            filtered outlier, which is correct to drop).
+                                            This is the metric that actually grades the
+                                            consolidation; it does **not** punish the
+                                            tape for the USD market being thinner than
+                                            the USDT market over a short window.
     score  = base − Σ issue_weights, clamped to [0, 100]
              weights: info 0 · minor 2 · major 10 · critical 30, per distinct issue.
+
+The raw second-by-second *density* of each series is still reported as
+``completeness_pct`` (and ``day_coverage_pct``) — it's an informational metric, not a
+penalty. So a thin pair can read e.g. "grade A · density 7%": the tape/feed is correct,
+the market is just quiet.
 
 Grades: A ≥ 95, B ≥ 85, C ≥ 70, D ≥ 50, F < 50.
 
@@ -113,8 +126,27 @@ def _completeness(bars: pd.DataFrame) -> tuple[float, int, int, int, int]:
     return round(completeness, 4), int(n), int(expected), max_gap, span_s
 
 
-def _score(completeness_pct: float, issues: list[Issue], *, is_consolidated: bool) -> tuple[float, str]:
-    base = completeness_pct if is_consolidated else 100.0
+def _agg_coverage_of_union(agg_bars: pd.DataFrame, per_venue_bars: dict[str, pd.DataFrame]) -> tuple[float | None, int]:
+    """For the ``agg`` series: what fraction of the seconds where *any* contributing
+    venue had a bar does the agg also have a bar? Returns ``(pct, n_union_seconds)``.
+
+    ``None`` if there's no per-venue context to compare against (then the caller falls
+    back to a clean baseline — the consolidated tape can't be held to a standard we
+    can't measure).
+    """
+    union: set[int] = set()
+    for df in per_venue_bars.values():
+        if not df.empty:
+            union |= set((df["ts_ns"].to_numpy() // 1_000_000_000).tolist())
+    if not union:
+        return None, 0
+    agg_secs: set[int] = set()
+    if not agg_bars.empty:
+        agg_secs = set((agg_bars["ts_ns"].to_numpy() // 1_000_000_000).tolist())
+    return round(100.0 * len(agg_secs & union) / len(union), 2), len(union)
+
+
+def _score(base: float, issues: list[Issue]) -> tuple[float, str]:
     score = base
     for iss in issues:
         score -= _ISSUE_WEIGHT.get(iss.severity, 0.0)
@@ -143,8 +175,22 @@ def score_day(symbol: str, venue: str, date) -> dict:
         agg_bars=agg_bars if venue == "agg" else None,
         per_venue_bars=per_venue_bars if venue == "agg" else None,
     )
-    completeness, n_bars, expected, max_gap, span_s = _completeness(bars)
-    score, grade = _score(completeness, issues, is_consolidated=(venue == "agg"))
+    completeness, n_bars, expected, max_gap, span_s = _completeness(bars)   # raw density (informational)
+
+    # Score base: a single venue captures all of its own activity → 100. The agg tape is
+    # graded on how much of the union of contributing venues it captures (≈100 when
+    # correct) — never on how thin the underlying market happens to be.
+    agg_cov_pct: float | None = None
+    union_secs = 0
+    if venue == "agg":
+        agg_cov_pct, union_secs = _agg_coverage_of_union(agg_bars if not agg_bars.empty else bars, per_venue_bars)
+        base = agg_cov_pct if agg_cov_pct is not None else 100.0
+        score_basis = "coverage_of_contributing_venues"
+    else:
+        base = 100.0
+        score_basis = "clean_baseline"
+
+    score, grade = _score(base, issues)
     sev_counts = Counter(i.severity.label for i in issues)
     return {
         "date": date,
@@ -152,9 +198,13 @@ def score_day(symbol: str, venue: str, date) -> dict:
         "venue": venue,
         "score": score,
         "grade": grade,
+        "score_basis": score_basis,
+        "score_base_pct": round(base, 2),
+        "agg_coverage_of_union_pct": agg_cov_pct,   # null for single-venue series
+        "union_seconds": int(union_secs) if venue == "agg" else None,
         "bars": n_bars,
         "expected_bars": expected,
-        "completeness_pct": completeness,
+        "completeness_pct": completeness,           # raw bar density over [first, last]
         "max_gap_seconds": max_gap,
         "span_seconds": span_s,
         "day_coverage_pct": round(100.0 * span_s / _FULL_DAY_SECONDS, 2) if span_s else 0.0,
@@ -206,10 +256,10 @@ def write_daily_quality(symbols: list[str] | None = None, dates: list[str] | Non
     with connect() as con:
         con.executemany(
             """INSERT OR REPLACE INTO daily_quality
-               (date, symbol, venue, score, grade, bars, expected_bars, completeness_pct,
-                max_gap_seconds, n_issues, n_critical, issues_json, computed_at_ns)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-            [(r["date"], r["symbol"], r["venue"], r["score"], r["grade"], r["bars"],
+               (date, symbol, venue, score, grade, score_base_pct, bars, expected_bars,
+                completeness_pct, max_gap_seconds, n_issues, n_critical, issues_json, computed_at_ns)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            [(r["date"], r["symbol"], r["venue"], r["score"], r["grade"], r["score_base_pct"], r["bars"],
               r["expected_bars"], r["completeness_pct"], r["max_gap_seconds"], r["n_issues"],
               r["n_critical"], json.dumps(r["issues"]), r["computed_at_ns"]) for r in rows],
         )
