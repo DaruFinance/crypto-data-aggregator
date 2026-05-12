@@ -2,13 +2,17 @@
 .DEFAULT_GOAL := help
 PY ?= python
 
-.PHONY: help install lint type test check dataset bars coverage validate status bench ingest compact clean
+.PHONY: help install smoke lint type test check dataset bars coverage validate status bench ingest compact clean
 
 help:  ## show this help
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
 
 install:  ## editable install with dev + obs extras
 	$(PY) -m pip install -e ".[dev,obs]"
+
+smoke: install  ## 60-second smoke test: install, run the test suite, print the project overview
+	$(PY) -m pytest -q
+	$(PY) -m scripts.status
 
 lint:  ## ruff
 	ruff check .

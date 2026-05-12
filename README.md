@@ -14,6 +14,34 @@ spot + perps.
 
 ---
 
+## Quick start — 60-second smoke test
+
+A sample dataset and its metadata ship in the repo (`data/meta/`), so a fresh clone
+shows you the project and its data quality immediately, no network required:
+
+```bash
+git clone https://github.com/DaruFinance/crypto-data-aggregator
+cd crypto-data-aggregator
+pip install -e ".[dev]"          # Python ≥ 3.11
+make smoke                       # == pytest -q  +  cda-status
+#   ↳ runs the 48-test suite, then prints a one-screen overview:
+#     what the project is · dataset coverage per table · the data-quality scorecard
+#     (per-(symbol,venue,date) score + A–F grade) · the corrections log · how to query it
+```
+
+`cda-status` alone (after the install) is the "show me everything at a glance" command;
+`pytest -q` is the quality signal (invariants, the consolidated tape, the data-quality
+checks, every venue's parse path). To see the full pipeline end-to-end against live
+exchanges (~2 minutes):
+
+```bash
+cda-build-dataset --trades-minutes 5 --reference-days 1   # backfill → consolidate → quality → coverage
+cda-validate                                              # data-quality scorecards; non-zero exit on a failing slice
+python -c "from cryptodata import get_bars; print(get_bars('BTC-USD','2026-01-01','2030-01-01','1m').tail())"
+```
+
+---
+
 ## What's in the box
 
 | Layer | What it does |
