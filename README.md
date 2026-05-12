@@ -23,22 +23,29 @@ shows you the project and its data quality immediately, no network required:
 git clone https://github.com/DaruFinance/crypto-data-aggregator
 cd crypto-data-aggregator
 pip install -e ".[dev]"          # Python ≥ 3.11
-make smoke                       # == pytest -q  +  cda-status
-#   ↳ runs the 48-test suite, then prints a one-screen overview:
-#     what the project is · dataset coverage per table · the data-quality scorecard
-#     (per-(symbol,venue,date) score + A–F grade) · the corrections log · how to query it
+
+pytest -q                        # the quality signal: 48 tests (invariants, the consolidated
+                                 # tape, the data-quality checks, every venue's parse path)
+python -m scripts.status         # one-screen overview: what the project is · dataset coverage
+                                 # per table · the data-quality scorecard (per-(symbol,venue,date)
+                                 # score + A–F grade) · the corrections log · how to query it
 ```
 
-`cda-status` alone (after the install) is the "show me everything at a glance" command;
-`pytest -q` is the quality signal (invariants, the consolidated tape, the data-quality
-checks, every venue's parse path). To see the full pipeline end-to-end against live
-exchanges (~2 minutes):
+`python -m scripts.status` (also installed as the `cda-status` console script) is the
+"show me everything at a glance" command — works the same on Windows PowerShell, macOS
+and Linux. On macOS/Linux `make smoke` is a shortcut for the two commands above; Windows
+has no `make`, so just run them directly as shown.
+
+To see the full pipeline run end-to-end against live exchanges (~2 minutes):
 
 ```bash
-cda-build-dataset --trades-minutes 5 --reference-days 1   # backfill → consolidate → quality → coverage
-cda-validate                                              # data-quality scorecards; non-zero exit on a failing slice
+python -m scripts.build_dataset --trades-minutes 5 --reference-days 1   # backfill → consolidate → quality → coverage
+python -m scripts.validate                                             # data-quality scorecards; non-zero exit on a failing slice
 python -c "from cryptodata import get_bars; print(get_bars('BTC-USD','2026-01-01','2030-01-01','1m').tail())"
 ```
+
+(`cda-build-dataset` / `cda-validate` / `cda-bench` / `cda-ingest` etc. are the same
+commands as `python -m scripts.<name>` — use whichever your shell resolves.)
 
 ---
 
