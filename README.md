@@ -1,6 +1,6 @@
 # crypto-data-aggregator
 
-> Supplies the market data for the studies Daniel Gatto publishes on [daru.finance](https://www.daru.finance).
+> Supplies the market data for the studies Daniel Gatto publishes on [daru.finance](https://daru.finance).
 
 A multi-venue crypto market-data aggregator with a **consolidated tape** at its core.
 It ingests trades, top-of-book quotes, L2 order-book snapshots, perpetual funding
